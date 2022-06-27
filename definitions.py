@@ -1,5 +1,3 @@
-import pygame
-
 
 class Color:
     def __init__(self, r, g, b, a=1):
@@ -31,10 +29,3 @@ class Object:
     def apply_update(self, update):
         self.x += update.dx
         self.y += update.dy
-
-
-class Player(Object):
-
-    def calculate_update(self):
-        r = 10
-        c = Color(0, 0, 0)
