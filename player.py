@@ -13,7 +13,7 @@ class Player(definitions.Object):
     stun_frames = 5
     curr_attack = None
     vel_y = 0
-    gravity = 5
+    gravity = 2
     moveset = attacks.MoveSet()
     num_jumps = 2
     remaining_jumps = 2
@@ -23,27 +23,6 @@ class Player(definitions.Object):
         self.controller = controllers.GameCubeController(player_num=player_num)
         self.curr_ctrl = self.controller.get_ctrl_frame()
         self.prev_ctrl = self.controller.get_ctrl_frame()
-
-    def apply_gravity(self):
-        self.y += self.vel_y
-
-        if self.is_airborne:
-            self.vel_y -= self.gravity
-
-            if self.y <= 100:
-                self.is_airborne = False
-                self.y = 100
-                self.vel_y = 0
-                return True
-
-        return False
-
-    def update_attack(self, attack_frame):
-        self.attack_frames.get_attack_frame(attack_frame)
-
-    def start_attack(self, attack):
-        self.curr_attack = attack
-        self.attack_frames = attack.num_frames
 
     def calculate_update(self):
         self.prev_ctrl = self.curr_ctrl
@@ -57,12 +36,15 @@ class Player(definitions.Object):
 
         if self.attack_frames > 0:
             if hit_ground:
+                self.sub_objects = []
                 self.curr_attack = None
                 self.attack_frames = 0
             else:
                 self.attack_frames -= 1
                 self.update_attack(self.attack_frames)
-                return
+                if self.attack_frames <= 0:
+                    self.sub_objects = []
+                    self.curr_attack = None
 
         if self.is_airborne:
             if self.remaining_jumps > 0 and (
@@ -137,6 +119,22 @@ class Player(definitions.Object):
             else:
                 raise Exception("Error in tilt attack execution.")
 
+        elif self.curr_ctrl.b and not self.prev_ctrl.b:
+            if abs(self.curr_ctrl.m_x) < 20 and abs(self.curr_ctrl.m_y) < 20:
+                self.start_attack(self.moveset.NeutralSpecial)
+            elif self.curr_ctrl.m_x > abs(self.curr_ctrl.m_y):
+                self.is_facing_right = True
+                self.start_attack(self.moveset.ForwardSpecial)
+            elif self.curr_ctrl.m_x < -abs(self.curr_ctrl.m_y):
+                self.is_facing_right = False
+                self.start_attack(self.moveset.ForwardSpecial)
+            elif self.curr_ctrl.m_y >= abs(self.curr_ctrl.m_x):
+                self.start_attack(self.moveset.UpSpecial)
+            elif self.curr_ctrl.m_y <= -abs(self.curr_ctrl.m_x):
+                self.start_attack(self.moveset.DownSpecial)
+            else:
+                raise Exception("Error in special attack execution.")
+
         elif abs(self.curr_ctrl.c_x) > 50 or abs(self.curr_ctrl.c_x) > 50:
             if self.curr_ctrl.c_x > abs(self.curr_ctrl.c_y):
                 self.is_facing_right = True
@@ -150,3 +148,25 @@ class Player(definitions.Object):
                 self.start_attack(self.moveset.DownSmash)
             else:
                 raise Exception("Error in smash attack execution.")
+
+    def apply_gravity(self):
+        self.y += self.vel_y
+
+        if self.is_airborne:
+            self.vel_y -= self.gravity
+
+            if self.y <= -200:
+                self.is_airborne = False
+                self.y = -200
+                self.vel_y = 0
+                return True
+
+        return False
+
+    def update_attack(self, attack_frame):
+        self.curr_attack.get_attack_frame(attack_frame)
+
+    def start_attack(self, attack):
+        self.curr_attack = attack()
+        self.attack_frames = self.curr_attack.num_frames
+        self.sub_objects = self.curr_attack.hitboxes

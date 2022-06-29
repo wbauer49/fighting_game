@@ -10,22 +10,19 @@ class Color:
         return self.r, self.g, self.b
 
 
-class ObjectUpdate:
-    dx = 0
-    dy = 0
-
-
 class Object:
     x = 0
     y = 0
-    r = 100
+    r = 50
     c = Color(0, 0, 0)
 
     sub_objects = []
 
     def calculate_update(self):
-        return ObjectUpdate()
+        for obj in self.sub_objects:
+            obj.calculate_update()
 
-    def apply_update(self, update):
-        self.x += update.dx
-        self.y += update.dy
+    def update_sub_objects(self):
+        for sub_obj in self.sub_objects:
+            sub_obj.calculate_update()
+            sub_obj.update_sub_objects()

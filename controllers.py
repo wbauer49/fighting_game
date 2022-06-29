@@ -6,7 +6,8 @@ class GameCubeController:
 
     def __init__(self, player_num=1):
         self.player_num = player_num
-        self.joystick = pygame.joystick.Joystick(player_num - 1)
+        print(pygame.joystick.get_count())
+        self.joystick = pygame.joystick.Joystick(4 - player_num)
         self.joystick.init()
 
     def get_ctrl_frame(self):
@@ -16,15 +17,17 @@ class GameCubeController:
 class CtrlFrame:
 
     def __init__(self, joystick):
+        pygame.event.pump()
         self.a = joystick.get_button(1)
         self.b = joystick.get_button(2)
         self.x = joystick.get_button(0)
         self.y = joystick.get_button(3)
         self.z = joystick.get_button(7)
         self.start = joystick.get_button(9)
-        self.m_x = round(100 * joystick.get_axis(0))
-        self.m_y = round(100 * joystick.get_axis(1))
-        self.c_x = round(100 * joystick.get_axis(2))
-        self.c_y = round(100 * joystick.get_axis(3))
-        self.l = round(100 * joystick.get_axis(4))
-        self.r = round(100 * joystick.get_axis(5))
+        self.m_x = min(100, max(-100, round(140 * joystick.get_axis(0))))
+        self.m_y = min(100, max(-100, round(-140 * joystick.get_axis(1))))
+        self.c_x = min(100, max(-100, round(140 * joystick.get_axis(2))))
+        self.c_y = min(100, max(-100, round(-140 * joystick.get_axis(5))))
+        self.l = min(100, max(0, round(100 * joystick.get_axis(3)) + 100))
+        self.r = min(100, max(0, round(100 * joystick.get_axis(4)) + 100))
+        print(self.m_x, self.m_y, self.c_x, self.c_y, self.l, self.r)
