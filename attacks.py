@@ -3,9 +3,8 @@ import definitions
 
 
 class HitBox(definitions.Object):
-    num_frames = 10
     frame = 0
-    c = definitions.Color(100, 100, 100)
+    c = definitions.Color(150, 150, 150)
 
     x = 0
     y = 0
@@ -17,11 +16,10 @@ class HitBox(definitions.Object):
     r_func = None
     active_func = None
 
-    def __init__(self, x=0, y=0, r=10, num_frames=10):
+    def __init__(self, x=0, y=0, r=10):
         self.x = x
         self.y = y
         self.r = r
-        self.num_frames = num_frames
 
     def step(self):
         self.frame += 1
@@ -59,7 +57,7 @@ class MoveSet:
         num_frames = 20
 
         def get_hitboxes(self):
-            return [HitBox(x=50, y=0, r=10, num_frames=10)]
+            return [HitBox(x=50, y=0, r=20)]
 
     class ForwardSmash(Attack):
         num_frames = 20
@@ -76,11 +74,19 @@ class MoveSet:
     class UpTilt(Attack):
         num_frames = 20
 
+        def get_hitboxes(self):
+            hitbox1 = HitBox(y=50, r=35)
+            hitbox1.x_func = lambda t: 40 - 4 * t
+            return [hitbox1]
+
     class DownTilt(Attack):
         num_frames = 20
 
     class NeutralAir(Attack):
-        num_frames = 20
+        num_frames = 10
+
+        def get_hitboxes(self):
+            return [HitBox(x=30, y=0, r=30), HitBox(x=-30, y=0, r=30)]
 
     class ForwardAir(Attack):
         num_frames = 20

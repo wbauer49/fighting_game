@@ -13,6 +13,8 @@ class Player(definitions.Object):
     stun_frames = 5
     curr_attack = None
     vel_y = 0
+    vel_x = 0
+    max_vel_x = 12
     gravity = 2
     moveset = attacks.MoveSet()
     num_jumps = 2
@@ -28,25 +30,25 @@ class Player(definitions.Object):
         self.prev_ctrl = self.curr_ctrl
         self.curr_ctrl = self.controller.get_ctrl_frame()
 
+        for hitbox in self.sub_objects:
+            hitbox.step()
+
+        self.horizontal_movement()
         hit_ground = self.apply_gravity()
 
         if self.stun_frames > 0:
             self.stun_frames -= 1
-            return
 
-        if self.attack_frames > 0:
-            if hit_ground:
+        elif self.attack_frames > 0:
+            if hit_ground or self.attack_frames == 1:
                 self.sub_objects = []
                 self.curr_attack = None
                 self.attack_frames = 0
             else:
                 self.attack_frames -= 1
                 self.update_attack(self.attack_frames)
-                if self.attack_frames <= 0:
-                    self.sub_objects = []
-                    self.curr_attack = None
 
-        if self.is_airborne:
+        elif self.is_airborne:
             if self.remaining_jumps > 0 and (
                     (self.curr_ctrl.x and not self.prev_ctrl.x) or
                     (self.curr_ctrl.y and not self.prev_ctrl.y) or
@@ -148,6 +150,33 @@ class Player(definitions.Object):
                 self.start_attack(self.moveset.DownSmash)
             else:
                 raise Exception("Error in smash attack execution.")
+
+    def horizontal_movement(self):
+        self.x += self.vel_x
+
+        if self.attack_frames > 0:
+            if self.vel_x > 0:
+                self.vel_x -= 1
+            elif self.vel_x < 0:
+                self.vel_x += 1
+
+        else:
+            if abs(self.curr_ctrl.m_x) < 10:
+                accel_dir = 0
+                accel = 0
+            else:
+                accel_dir = 1 if self.curr_ctrl.m_x > 0 else -1
+                accel = (abs(self.curr_ctrl.m_x) - 10) // 30
+
+            self.vel_x = min(self.max_vel_x, max(-self.max_vel_x, self.vel_x + accel_dir * accel))
+            if not self.is_airborne:
+                if self.vel_x < 0:
+                    self.is_facing_right = False
+                elif self.vel_x > 0:
+                    self.is_facing_right = True
+
+                if self.vel_x == self.max_vel_x or self.vel_x == -self.max_vel_x:
+                    self.is_running = True
 
     def apply_gravity(self):
         self.y += self.vel_y

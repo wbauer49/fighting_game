@@ -17,7 +17,6 @@ class GameCubeController:
 class CtrlFrame:
 
     def __init__(self, joystick):
-        pygame.event.pump()
         self.a = joystick.get_button(1)
         self.b = joystick.get_button(2)
         self.x = joystick.get_button(0)
@@ -30,4 +29,3 @@ class CtrlFrame:
         self.c_y = min(100, max(-100, round(-140 * joystick.get_axis(5))))
         self.l = min(100, max(0, round(100 * joystick.get_axis(3)) + 100))
         self.r = min(100, max(0, round(100 * joystick.get_axis(4)) + 100))
-        print(self.m_x, self.m_y, self.c_x, self.c_y, self.l, self.r)
