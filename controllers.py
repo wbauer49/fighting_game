@@ -6,7 +6,6 @@ class GameCubeController:
 
     def __init__(self, player_num=1):
         self.player_num = player_num
-        print(pygame.joystick.get_count())
         self.joystick = pygame.joystick.Joystick(4 - player_num)
         self.joystick.init()
 

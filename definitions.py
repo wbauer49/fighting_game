@@ -1,6 +1,6 @@
 
 class Color:
-    def __init__(self, r, g, b, a=1):
+    def __init__(self, r, g, b, a=1.0):
         self.r = r
         self.g = g
         self.b = b
@@ -14,7 +14,8 @@ class Object:
     x = 0
     y = 0
     r = 50
-    c = Color(0, 0, 0)
+    c = Color(0, 0, 0, a=0.6)
+    is_facing_right = True
 
     sub_objects = []
 
@@ -26,3 +27,9 @@ class Object:
         for sub_obj in self.sub_objects:
             sub_obj.calculate_update()
             sub_obj.update_sub_objects()
+
+    def get_x(self):
+        return self.x
+
+    def get_y(self):
+        return self.y

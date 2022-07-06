@@ -2,12 +2,15 @@
 import pygame
 import time
 
+import attacks
 import player
 import rendering
 
 
 renderer = rendering.Renderer()
-objects = [player.Player(player_num=1)]
+player1 = player.Player(player_num=1)
+player2 = player.Player(player_num=2)
+objects = [player2, player1]
 
 pygame.init()
 running = True
@@ -23,7 +26,11 @@ while running:
         obj.calculate_update()
         obj.update_sub_objects()
     renderer.render(objects)
+
     pygame.display.flip()
+
+    attacks.apply_hitboxes(player1, player2)
+    attacks.apply_hitboxes(player2, player1)
 
     time.sleep(max((1 / 60) - (time.time() - start_time), 0))
 

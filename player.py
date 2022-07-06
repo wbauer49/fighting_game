@@ -1,21 +1,27 @@
+import math
 
 import attacks
 import controllers
 import definitions
+import rendering
 
 
 class Player(definitions.Object):
 
     is_facing_right = True
-    is_airborne = False
+    is_airborne = True
     is_running = False
+
     attack_frames = 0
     stun_frames = 5
     curr_attack = None
+    damage_taken = 0
+
     vel_y = 0
     vel_x = 0
     max_vel_x = 12
     gravity = 2
+
     moveset = attacks.MoveSet()
     num_jumps = 2
     remaining_jumps = 2
@@ -46,7 +52,6 @@ class Player(definitions.Object):
                 self.attack_frames = 0
             else:
                 self.attack_frames -= 1
-                self.update_attack(self.attack_frames)
 
         elif self.is_airborne:
             if self.remaining_jumps > 0 and (
@@ -154,7 +159,17 @@ class Player(definitions.Object):
     def horizontal_movement(self):
         self.x += self.vel_x
 
-        if self.attack_frames > 0:
+        if self.x > rendering.WIDTH // 2 - self.r:
+            self.vel_x = -abs(self.vel_x)
+            self.x = rendering.WIDTH // 2 - self.r
+        elif self.x < -(rendering.WIDTH // 2 - self.r):
+            self.vel_x = abs(self.vel_x)
+            self.x = -(rendering.WIDTH // 2 - self.r)
+
+        if self.stun_frames > 0:
+            pass
+
+        elif self.attack_frames > 0 or abs(self.curr_ctrl.m_x) < 10:
             if self.vel_x > 0:
                 self.vel_x -= 1
             elif self.vel_x < 0:
@@ -178,6 +193,7 @@ class Player(definitions.Object):
                 if self.vel_x == self.max_vel_x or self.vel_x == -self.max_vel_x:
                     self.is_running = True
 
+
     def apply_gravity(self):
         self.y += self.vel_y
 
@@ -192,10 +208,17 @@ class Player(definitions.Object):
 
         return False
 
-    def update_attack(self, attack_frame):
-        self.curr_attack.get_attack_frame(attack_frame)
-
     def start_attack(self, attack):
-        self.curr_attack = attack()
+        self.curr_attack = attack(self.is_facing_right)
         self.attack_frames = self.curr_attack.num_frames
         self.sub_objects = self.curr_attack.hitboxes
+
+    def apply_hitbox(self, hitbox):
+        self.is_airborne = True
+        self.stun_frames = round(hitbox.hitstun)
+        power = round((50 + self.damage_taken) * hitbox.send_power / 30)
+        self.vel_x = power * math.cos(math.radians(hitbox.send_angle))
+        self.vel_y = power * math.sin(math.radians(hitbox.send_angle))
+        self.damage_taken += hitbox.damage
+        hitbox.hit_player = True
+        print(self.damage_taken)
