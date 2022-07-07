@@ -1,6 +1,7 @@
 
 class Color:
-    def __init__(self, r, g, b, a=1.0):
+
+    def __init__(self, r, g, b, a=255):
         self.r = r
         self.g = g
         self.b = b
@@ -13,8 +14,8 @@ class Color:
 class Object:
     x = 0
     y = 0
-    r = 50
-    c = Color(0, 0, 0, a=0.6)
+    r = 40
+    color = Color(1, 1, 1, a=150)
     is_facing_right = True
 
     sub_objects = []
@@ -33,3 +34,6 @@ class Object:
 
     def get_y(self):
         return self.y
+
+    def get_color(self):
+        return self.color

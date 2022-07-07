@@ -1,6 +1,6 @@
 import math
 
-import attacks
+import movesets
 import controllers
 import definitions
 import rendering
@@ -22,7 +22,7 @@ class Player(definitions.Object):
     max_vel_x = 12
     gravity = 2
 
-    moveset = attacks.MoveSet()
+    moveset = movesets.MoveSet()
     num_jumps = 2
     remaining_jumps = 2
 
@@ -31,6 +31,12 @@ class Player(definitions.Object):
         self.controller = controllers.GameCubeController(player_num=player_num)
         self.curr_ctrl = self.controller.get_ctrl_frame()
         self.prev_ctrl = self.controller.get_ctrl_frame()
+
+    def get_color(self):
+        if self.stun_frames > 0:
+            return definitions.Color(100, 1, 1)
+        else:
+            return definitions.Color(1, 1, 1)
 
     def calculate_update(self):
         self.prev_ctrl = self.curr_ctrl
@@ -59,7 +65,6 @@ class Player(definitions.Object):
                     (self.curr_ctrl.y and not self.prev_ctrl.y) or
                     (self.curr_ctrl.m_y > 50 and self.curr_ctrl.m_y - self.prev_ctrl.m_y >= 10)
             ):
-                self.is_airborne = True
                 self.remaining_jumps -= 1
                 self.vel_y = 20
 
@@ -193,16 +198,15 @@ class Player(definitions.Object):
                 if self.vel_x == self.max_vel_x or self.vel_x == -self.max_vel_x:
                     self.is_running = True
 
-
     def apply_gravity(self):
         self.y += self.vel_y
 
         if self.is_airborne:
             self.vel_y -= self.gravity
 
-            if self.y <= -200:
+            if self.y <= -rendering.HEIGHT // 2 + self.r:
                 self.is_airborne = False
-                self.y = -200
+                self.y = -rendering.HEIGHT // 2 + self.r
                 self.vel_y = 0
                 return True
 

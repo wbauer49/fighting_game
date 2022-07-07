@@ -1,4 +1,6 @@
 
+import math
+
 import definitions
 
 
@@ -7,7 +9,8 @@ def apply_hitboxes(attacker, receiver):
         if hitbox.hit_player or not hitbox.is_active:
             continue
 
-        distance = round(((attacker.x + hitbox.get_x() - receiver.x) ** 2 + (attacker.y + hitbox.get_y() - receiver.y) ** 2) ** 0.5)
+        distance = round(((attacker.x + hitbox.get_x() - receiver.x) ** 2 +
+                          (attacker.y + hitbox.get_y() - receiver.y) ** 2) ** 0.5)
         if attacker.r + receiver.r > distance:
             receiver.apply_hitbox(hitbox)
             break
@@ -15,7 +18,6 @@ def apply_hitboxes(attacker, receiver):
 
 class HitBox(definitions.Object):
     frame = 0
-    c = definitions.Color(150, 150, 150)
     damage = 10
     is_facing_right = True
 
@@ -45,6 +47,15 @@ class HitBox(definitions.Object):
         self.frame += 1
         self.calculate_hitbox(self.frame)
 
+    def get_color(self):
+        alpha = 255 * self.send_power // 10
+        angle = math.radians(self.send_angle)
+        r = round(120 + 120 * math.cos(angle))
+        g = round(120 + 120 * (-math.cos(angle) / 2 + math.sin(angle) * math.sqrt(3) / 2))
+        b = round(120 + 120 * (-math.cos(angle) / 2 - math.sin(angle) * math.sqrt(3) / 2))
+
+        return definitions.Color(r, g, b, a=alpha)
+
     def calculate_hitbox(self, t):
         if self.x_func:
             self.x = self.x_func(t)
@@ -73,66 +84,3 @@ class Attack:
 
     def init_hitboxes(self):
         return []
-
-
-class MoveSet:
-
-    class Jab(Attack):
-        num_frames = 20
-
-        def init_hitboxes(self):
-            return [HitBox(x=50, y=0, r=20)]
-
-    class ForwardSmash(Attack):
-        num_frames = 20
-
-    class UpSmash(Attack):
-        num_frames = 20
-
-    class DownSmash(Attack):
-        num_frames = 20
-
-    class ForwardTilt(Attack):
-        num_frames = 20
-
-    class UpTilt(Attack):
-        num_frames = 20
-
-        def init_hitboxes(self):
-            hitbox1 = HitBox(y=50, r=35, send_angle=90, send_power=10)
-            hitbox1.x_func = lambda t: 40 - 4 * t
-            return [hitbox1]
-
-    class DownTilt(Attack):
-        num_frames = 20
-
-    class NeutralAir(Attack):
-        num_frames = 10
-
-        def init_hitboxes(self):
-            return [HitBox(x=30, y=0, r=30, send_angle=30, send_power=8),
-                    HitBox(x=-30, y=0, r=30, send_angle=150, send_power=8)]
-
-    class ForwardAir(Attack):
-        num_frames = 20
-
-    class BackAir(Attack):
-        num_frames = 20
-
-    class UpAir(Attack):
-        num_frames = 20
-
-    class DownAir(Attack):
-        num_frames = 20
-
-    class NeutralSpecial(Attack):
-        num_frames = 20
-
-    class ForwardSpecial(Attack):
-        num_frames = 20
-
-    class UpSpecial(Attack):
-        num_frames = 20
-
-    class DownSpecial(Attack):
-        num_frames = 20
