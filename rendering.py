@@ -22,7 +22,7 @@ class Renderer:
     def render_object(self, obj, x_offset=0, y_offset=0):
         surface = pygame.Surface((WIDTH, HEIGHT))
         surface.set_colorkey((0, 0, 0))
-        surface.set_alpha(obj.color.a)
+        surface.set_alpha(obj.get_color().a)
 
         center_x = WIDTH / 2 + obj.get_x() + x_offset
         center_y = HEIGHT / 2 - obj.get_y() - y_offset
