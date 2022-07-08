@@ -22,6 +22,9 @@ class MoveSet:
     class ForwardTilt(Attack):
         num_frames = 20
 
+        def init_hitboxes(self):
+            return [HitBox(x=40, y=0, r=10, send_angle=10, send_power=8)]
+
     class UpTilt(Attack):
         num_frames = 20
 
@@ -32,6 +35,10 @@ class MoveSet:
 
     class DownTilt(Attack):
         num_frames = 20
+
+        def init_hitboxes(self):
+            return [HitBox(x=30, y=-20, r=20, send_angle=40, send_power=8),
+                    HitBox(x=60, y=-25, r=15, send_angle=90, send_power=6)]
 
     class NeutralAir(Attack):
         num_frames = 10
@@ -54,6 +61,13 @@ class MoveSet:
 
     class NeutralSpecial(Attack):
         num_frames = 20
+
+        def init_hitboxes(self):
+            hitbox1 = HitBox(y=0, r=30, send_angle=60, send_power=4)
+            hitbox1.x_func = lambda t: t
+            hitbox2 = HitBox(y=0, r=30, send_angle=60, send_power=4)
+            hitbox2.x_func = lambda t: -t
+            return [hitbox1, hitbox2]
 
     class ForwardSpecial(Attack):
         num_frames = 20

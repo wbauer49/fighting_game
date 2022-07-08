@@ -14,6 +14,8 @@ class Player(definitions.Object):
 
     attack_frames = 0
     stun_frames = 5
+    paused_frames = 0
+
     curr_attack = None
     damage_taken = 0
 
@@ -41,6 +43,10 @@ class Player(definitions.Object):
     def calculate_update(self):
         self.prev_ctrl = self.curr_ctrl
         self.curr_ctrl = self.controller.get_ctrl_frame()
+
+        if self.paused_frames > 0:
+            self.paused_frames -= 1
+            return
 
         for hitbox in self.sub_objects:
             hitbox.step()

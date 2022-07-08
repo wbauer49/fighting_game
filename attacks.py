@@ -5,14 +5,21 @@ import definitions
 
 
 def apply_hitboxes(attacker, receiver):
+
+    if attacker.curr_attack is None or attacker.curr_attack.hit_player:
+        return
+
     for hitbox in attacker.sub_objects:
-        if hitbox.hit_player or not hitbox.is_active:
+        if not hitbox.is_active:
             continue
 
         distance = round(((attacker.x + hitbox.get_x() - receiver.x) ** 2 +
                           (attacker.y + hitbox.get_y() - receiver.y) ** 2) ** 0.5)
-        if attacker.r + receiver.r > distance:
+        if hitbox.r + receiver.r > distance:
             receiver.apply_hitbox(hitbox)
+            attacker.curr_attack.hit_player = True
+            attacker.paused_frames = 4
+            receiver.paused_frames = 4
             break
 
 
@@ -29,7 +36,6 @@ class HitBox(definitions.Object):
     y = 0
     r = 10
     is_active = True
-    hit_player = False
 
     x_func = None
     y_func = None
@@ -71,7 +77,9 @@ class HitBox(definitions.Object):
 
 
 class Attack:
-    num_frames = None
+    num_frames = 20
+
+    hit_player = False
 
     def __init__(self, is_facing_right):
         self.is_facing_right = is_facing_right
