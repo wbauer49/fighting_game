@@ -11,8 +11,10 @@ class Player(definitions.Object):
     is_airborne = True
     is_running = False
 
+    airdodge_frames = 0
     attack_frames = 0
     stun_frames = 0
+    jumpsquat_frames = 0
     paused_frames = 0
 
     curr_attack = None
@@ -48,8 +50,16 @@ class Player(definitions.Object):
         self.paused_frames = 10
 
     def get_color(self):
-        if self.stun_frames > 0:
+        if self.attack_frames:
+            return definitions.Color(30, 30, 1)
+        elif self.airdodge_frames:
+            return definitions.Color(100, 1, 100)
+        elif self.stun_frames:
             return definitions.Color(100, 1, 1)
+        elif self.jumpsquat_frames:
+            return definitions.Color(1, 50, 50)
+        elif self.paused_frames:
+            return definitions.Color(100, 100, 100)
         else:
             return definitions.Color(1, 1, 1)
 
@@ -61,24 +71,61 @@ class Player(definitions.Object):
             self.paused_frames -= 1
             return
 
+        # hit_ground check
+        # TODO: move checks like hit_ground, is_airborne, etc. to be assigned in function here
+        hit_ground = False
+        if self.y < -rendering.HEIGHT // 2 + self.r:
+            hit_ground = True
+            self.y = -rendering.HEIGHT // 2 + self.r
+            self.vel_y = 0
+            self.is_airborne = False
+
+        elif self.y > rendering.HEIGHT * 3 // 2:
+            self.respawn()
+            return
+
+        if self.airdodge_frames > 0:
+            self.airdodge_frames -= 1
+            self.x += self.vel_x
+            self.y += self.vel_y
+            if hit_ground:
+                self.airdodge_frames = min(3, self.airdodge_frames)
+                return
+
+            if self.airdodge_frames == 0 and self.is_airborne:
+                self.vel_x = 0
+                self.vel_y = 0
+                self.paused_frames = 6
+            return
+
+        if self.jumpsquat_frames > 0:
+            self.jumpsquat_frames -= 1
+
+            if self.jumpsquat_frames == 0:
+                self.remaining_jumps = self.num_jumps - 1
+                self.vel_y = 20
+                self.is_airborne = True
+            return
+
         for hitbox in self.sub_objects:
             hitbox.step()
 
-        self.horizontal_movement()
-        hit_ground = self.apply_gravity()
+        self.apply_movement()
 
         if self.stun_frames > 0:
             self.stun_frames -= 1
+            return
 
-        elif self.attack_frames > 0:
+        if self.attack_frames > 0:
             if hit_ground or self.attack_frames == 1:
                 self.sub_objects = []
                 self.curr_attack = None
                 self.attack_frames = 0
             else:
                 self.attack_frames -= 1
+            return
 
-        elif self.curr_ctrl.b and not self.prev_ctrl.b:
+        if self.curr_ctrl.b and not self.prev_ctrl.b:
             if abs(self.curr_ctrl.m_x) < 20 and abs(self.curr_ctrl.m_y) < 20:
                 self.start_attack(self.moveset.NeutralSpecial)
             elif self.curr_ctrl.m_x > abs(self.curr_ctrl.m_y):
@@ -93,8 +140,9 @@ class Player(definitions.Object):
                 self.start_attack(self.moveset.DownSpecial)
             else:
                 raise Exception("Error in special attack execution.")
+            return
 
-        elif self.is_airborne:
+        if self.is_airborne:
             if self.remaining_jumps > 0 and (
                     (self.curr_ctrl.x and not self.prev_ctrl.x) or
                     (self.curr_ctrl.y and not self.prev_ctrl.y) or
@@ -103,6 +151,15 @@ class Player(definitions.Object):
             ):  # TODO: make sure this doesn't immediately double jump
                 self.remaining_jumps -= 1
                 self.vel_y = 20
+
+            if (
+                    (self.curr_ctrl.l >= 80 and self.prev_ctrl.l < 80) or
+                    (self.curr_ctrl.r >= 80 and self.prev_ctrl.r < 80)
+            ):
+                self.airdodge_frames = 14
+                self.vel_x = self.curr_ctrl.m_x // 5
+                self.vel_y = self.curr_ctrl.m_y // 5
+                return
 
             if self.curr_ctrl.a and not self.prev_ctrl.a:
                 if abs(self.curr_ctrl.m_x) < 20 and abs(self.curr_ctrl.m_y) < 20:
@@ -123,8 +180,9 @@ class Player(definitions.Object):
                     self.start_attack(self.moveset.DownAir)
                 else:
                     raise Exception("Error in a-button aerial attack execution.")
+                return
 
-            elif abs(self.curr_ctrl.c_x) > 50 or abs(self.curr_ctrl.c_y) > 50:
+            if abs(self.curr_ctrl.c_x) > 50 or abs(self.curr_ctrl.c_y) > 50:
                 if self.curr_ctrl.c_x > abs(self.curr_ctrl.c_y):
                     if self.is_facing_right:
                         self.start_attack(self.moveset.ForwardAir)
@@ -141,17 +199,19 @@ class Player(definitions.Object):
                     self.start_attack(self.moveset.UpAir)
                 else:
                     raise Exception("Error in c-stick aerial attack execution.")
+                return
 
-        elif (
+            return
+
+        if (
                 (self.curr_ctrl.x and not self.prev_ctrl.x) or
                 (self.curr_ctrl.y and not self.prev_ctrl.y) or
                 (self.curr_ctrl.m_y > 50 and self.curr_ctrl.m_y - self.prev_ctrl.m_y >= 10)
         ):
-            self.is_airborne = True
-            self.remaining_jumps = self.num_jumps - 1
-            self.vel_y = 20
+            self.jumpsquat_frames = 3
+            self.vel_y = 0
 
-        elif self.curr_ctrl.a and not self.prev_ctrl.a:
+        if self.curr_ctrl.a and not self.prev_ctrl.a:
             if abs(self.curr_ctrl.m_x) < 20 and abs(self.curr_ctrl.m_y) < 20:
                 self.start_attack(self.moveset.Jab)
             elif self.curr_ctrl.m_x > abs(self.curr_ctrl.m_y):
@@ -166,8 +226,9 @@ class Player(definitions.Object):
                 self.start_attack(self.moveset.DownTilt)
             else:
                 raise Exception("Error in tilt attack execution.")
+            return
 
-        elif abs(self.curr_ctrl.c_x) > 50 or abs(self.curr_ctrl.c_y) > 50:
+        if abs(self.curr_ctrl.c_x) > 50 or abs(self.curr_ctrl.c_y) > 50:
             if self.curr_ctrl.c_x > abs(self.curr_ctrl.c_y):
                 self.is_facing_right = True
                 self.start_attack(self.moveset.ForwardSmash)
@@ -180,8 +241,9 @@ class Player(definitions.Object):
                 self.start_attack(self.moveset.DownSmash)
             else:
                 raise Exception("Error in smash attack execution.")
+            return
 
-    def horizontal_movement(self):
+    def apply_movement(self):
         self.x += self.vel_x
 
         if self.x > rendering.WIDTH // 2 - self.r:
@@ -218,21 +280,9 @@ class Player(definitions.Object):
                 if self.vel_x == self.max_vel_x or self.vel_x == -self.max_vel_x:
                     self.is_running = True
 
-    def apply_gravity(self):
         self.y += self.vel_y
-
-        if self.is_airborne:
+        if self.is_airborne and self.airdodge_frames == 0:
             self.vel_y -= self.gravity
-
-            if self.y <= -rendering.HEIGHT // 2 + self.r:
-                self.is_airborne = False
-                self.y = -rendering.HEIGHT // 2 + self.r
-                self.vel_y = 0
-                return True
-            if self.y > rendering.HEIGHT * 3 // 2:
-                self.respawn()
-
-        return False
 
     def start_attack(self, attack):
         self.curr_attack = attack(self.is_facing_right)
