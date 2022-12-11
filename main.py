@@ -5,12 +5,13 @@ import time
 import attacks
 import player
 import rendering
-
+import stages
 
 try:
     renderer = rendering.Renderer()
-    player1 = player.Player(player_num=1)
-    player2 = player.Player(player_num=2)
+    stage = stages.Battlefield()
+    player1 = player.Player(player_num=1, stage=stage)
+    player2 = player.Player(player_num=2, stage=stage)
     objects = [player2, player1]
 
     pygame.init()
@@ -26,7 +27,7 @@ try:
         for obj in objects:
             obj.calculate_update()
             obj.update_sub_objects()
-        renderer.render(objects)
+        renderer.render(stage, objects)
 
         pygame.display.flip()
 

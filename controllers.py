@@ -6,7 +6,7 @@ class GameCubeController:
 
     def __init__(self, player_num=1):
         self.player_num = player_num
-        self.joystick = pygame.joystick.Joystick(4 - player_num)
+        self.joystick = pygame.joystick.Joystick(5 - player_num)
         self.joystick.init()
 
     def get_ctrl_frame(self):

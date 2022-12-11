@@ -25,12 +25,15 @@ class Player(definitions.Object):
     max_vel_x = 12
     gravity = 2
 
+    curr_platform = None
+
     moveset = movesets.MoveSet()
     num_jumps = 2
     remaining_jumps = 2
 
-    def __init__(self, player_num):
+    def __init__(self, player_num, stage):
         self.player_num = player_num
+        self.stage = stage
         self.controller = controllers.GameCubeController(player_num=player_num)
         self.curr_ctrl = self.controller.get_ctrl_frame()
         self.prev_ctrl = self.controller.get_ctrl_frame()
@@ -63,6 +66,25 @@ class Player(definitions.Object):
         else:
             return definitions.Color(1, 1, 1)
 
+    def check_hit_ground(self):
+        for platform in self.stage.platforms:
+            if platform.x - platform.w // 2 <= self.x <= platform.x + platform.w // 2:
+                # if platform.is_solid:
+                #     if platform.y - platform.h // 2 <= self.y + self.r <= platform.y + platform.h // 2:
+                #         self.vel_y = 0
+                #     self.y = platform.y - platform.h // 2 - self.r
+                if (
+                        self.y - self.r < platform.y + platform.h // 2 and
+                        self.y > platform.y - platform.h // 2 and
+                        self.y - self.r - self.vel_y >= platform.y + platform.h // 2
+                ):
+                    self.y = platform.y + platform.h // 2 + self.r
+                    self.vel_y = 0
+                    self.is_airborne = False
+                    self.curr_platform = platform
+                    return True
+        return False
+
     def calculate_update(self):
         self.prev_ctrl = self.curr_ctrl
         self.curr_ctrl = self.controller.get_ctrl_frame()
@@ -71,16 +93,10 @@ class Player(definitions.Object):
             self.paused_frames -= 1
             return
 
-        # hit_ground check
-        # TODO: move checks like hit_ground, is_airborne, etc. to be assigned in function here
-        hit_ground = False
-        if self.y < -rendering.HEIGHT // 2 + self.r:
-            hit_ground = True
-            self.y = -rendering.HEIGHT // 2 + self.r
-            self.vel_y = 0
-            self.is_airborne = False
-
-        elif self.y > rendering.HEIGHT * 3 // 2:
+        if (
+                self.x > rendering.WIDTH or self.x < -rendering.WIDTH or
+                self.y > rendering.HEIGHT or self.y < -rendering.HEIGHT
+        ):
             self.respawn()
             return
 
@@ -88,7 +104,7 @@ class Player(definitions.Object):
             self.airdodge_frames -= 1
             self.x += self.vel_x
             self.y += self.vel_y
-            if hit_ground:
+            if self.check_hit_ground():
                 self.airdodge_frames = min(3, self.airdodge_frames)
                 return
 
@@ -110,7 +126,16 @@ class Player(definitions.Object):
         for hitbox in self.sub_objects:
             hitbox.step()
 
+        if self.curr_platform and (
+                self.x < self.curr_platform.x - self.curr_platform.h // 2 or
+                self.x > self.curr_platform.x + self.curr_platform.h // 2
+        ):
+            self.curr_platform = None
+            self.is_airborne = True
+
         self.apply_movement()
+
+        hit_ground = self.check_hit_ground()
 
         if self.stun_frames > 0:
             self.stun_frames -= 1
@@ -147,7 +172,6 @@ class Player(definitions.Object):
                     (self.curr_ctrl.x and not self.prev_ctrl.x) or
                     (self.curr_ctrl.y and not self.prev_ctrl.y) or
                     (self.curr_ctrl.m_y > 50 and self.curr_ctrl.m_y - self.prev_ctrl.m_y >= 10)
-
             ):  # TODO: make sure this doesn't immediately double jump
                 self.remaining_jumps -= 1
                 self.vel_y = 20
@@ -156,7 +180,7 @@ class Player(definitions.Object):
                     (self.curr_ctrl.l >= 80 and self.prev_ctrl.l < 80) or
                     (self.curr_ctrl.r >= 80 and self.prev_ctrl.r < 80)
             ):
-                self.airdodge_frames = 14
+                self.airdodge_frames = 10
                 self.vel_x = self.curr_ctrl.m_x // 5
                 self.vel_y = self.curr_ctrl.m_y // 5
                 return
