@@ -4,7 +4,6 @@ import pygame
 WIDTH = 1600
 HEIGHT = 900
 BACKGROUND_COLOR = (255, 255, 255)
-PLATFORM_COLOR = (20, 20, 20)
 
 
 class Renderer:
@@ -24,7 +23,7 @@ class Renderer:
         self.screen.fill(BACKGROUND_COLOR)
         for platform in stage.platforms:
             surface = pygame.Surface((platform.w, platform.h))
-            surface.fill(PLATFORM_COLOR)
+            surface.fill(platform.color.as_tuple())
             x = WIDTH // 2 + platform.x - platform.w // 2
             y = HEIGHT // 2 - (platform.y + platform.h // 2)
             self.screen.blit(surface, (x, y))
@@ -39,5 +38,5 @@ class Renderer:
         pygame.draw.circle(surface, obj.get_color().as_tuple(), (obj.r, obj.r), obj.r)
         self.screen.blit(surface, (center_x - obj.r, center_y - obj.r))
 
-        for sub_object in obj.sub_objects:
+        for sub_object in obj.get_sub_objects():
             self.render_object(sub_object, x_offset=(obj.get_x() + x_offset), y_offset=(obj.get_y() + y_offset))

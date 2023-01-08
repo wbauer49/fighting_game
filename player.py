@@ -38,6 +38,12 @@ class Player(definitions.Object):
         self.curr_ctrl = self.controller.get_ctrl_frame()
         self.prev_ctrl = self.controller.get_ctrl_frame()
 
+        self.eye = definitions.Object()
+        self.eye.x = 20
+        self.eye.y = 10
+        self.eye.r = 5
+        self.eye.color = definitions.Color(200, 200, 200)
+
     def respawn(self):
         self.x = 0
         self.y = 0
@@ -51,6 +57,16 @@ class Player(definitions.Object):
         self.attack_frames = 0
         self.stun_frames = 0
         self.paused_frames = 10
+
+    def get_hitboxes(self):
+        if self.curr_attack is not None:
+            return self.curr_attack.hitboxes
+        else:
+            return []
+
+    def get_sub_objects(self):
+        self.eye.x = 20 if self.is_facing_right else -20
+        return self.get_hitboxes() + [self.eye]
 
     def get_color(self):
         if self.attack_frames:
@@ -119,16 +135,17 @@ class Player(definitions.Object):
 
             if self.jumpsquat_frames == 0:
                 self.remaining_jumps = self.num_jumps - 1
-                self.vel_y = 20
+                self.vel_y = 25
+                self.curr_platform = None
                 self.is_airborne = True
             return
 
-        for hitbox in self.sub_objects:
+        for hitbox in self.get_hitboxes():
             hitbox.step()
 
         if self.curr_platform and (
-                self.x < self.curr_platform.x - self.curr_platform.h // 2 or
-                self.x > self.curr_platform.x + self.curr_platform.h // 2
+                self.x < self.curr_platform.x - self.curr_platform.w // 2 or
+                self.x > self.curr_platform.x + self.curr_platform.w // 2
         ):
             self.curr_platform = None
             self.is_airborne = True
@@ -143,7 +160,6 @@ class Player(definitions.Object):
 
         if self.attack_frames > 0:
             if hit_ground or self.attack_frames == 1:
-                self.sub_objects = []
                 self.curr_attack = None
                 self.attack_frames = 0
             else:
@@ -311,14 +327,13 @@ class Player(definitions.Object):
     def start_attack(self, attack):
         self.curr_attack = attack(self.is_facing_right)
         self.attack_frames = self.curr_attack.num_frames
-        self.sub_objects = self.curr_attack.hitboxes
 
     def apply_hitbox(self, hitbox):
         self.is_airborne = True
         self.stun_frames = round(hitbox.hitstun)
-        power = round((50 + self.damage_taken) * hitbox.send_power / 30)
+        power = 1 + self.damage_taken * hitbox.send_power // 40
         self.vel_x = round(power * math.cos(math.radians(hitbox.send_angle)))
-        self.vel_y = round(power * math.sin(math.radians(hitbox.send_angle)))
+        self.vel_y = round(power * math.sin(math.radians(hitbox.send_angle))) + self.gravity
         self.damage_taken += hitbox.damage
         hitbox.hit_player = True
         print(self.damage_taken)

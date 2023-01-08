@@ -3,6 +3,8 @@ import definitions
 
 class Platform:
 
+    color = definitions.Color(20, 20, 20)
+
     def __init__(self, x, y, w, h, is_solid=False):
         self.x = x
         self.y = y

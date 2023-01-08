@@ -9,7 +9,7 @@ def apply_hitboxes(attacker, receiver):
     if attacker.curr_attack is None or attacker.curr_attack.hit_player:
         return
 
-    for hitbox in attacker.sub_objects:
+    for hitbox in attacker.get_hitboxes():
         if not hitbox.is_active:
             continue
 
@@ -35,7 +35,7 @@ class HitBox(definitions.Object):
     sp_func = None
     ia_func = None
 
-    def __init__(self, x=0, y=0, r=10, send_angle=0, send_power=5, damage=10, hitstun=10):
+    def __init__(self, x=0, y=0, r=10, send_angle=0, send_power=5, damage=10, hitstun=30):
         self.x = x
         self.y = y
         self.r = r

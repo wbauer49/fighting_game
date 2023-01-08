@@ -3,6 +3,7 @@ import pygame
 import time
 
 import attacks
+import definitions
 import player
 import rendering
 import stages
@@ -27,6 +28,12 @@ try:
         for obj in objects:
             obj.calculate_update()
             obj.update_sub_objects()
+
+        for platform in stage.platforms:
+            if platform == player1.curr_platform:
+                platform.color = definitions.Color(200, 20, 20)
+            else:
+                platform.color = definitions.Color(20, 20, 20)
         renderer.render(stage, objects)
 
         pygame.display.flip()

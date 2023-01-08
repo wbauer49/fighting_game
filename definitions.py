@@ -18,14 +18,15 @@ class Object:
     color = Color(1, 1, 1, a=150)
     is_facing_right = True
 
-    sub_objects = []
+    def get_sub_objects(self):
+        return []
 
     def calculate_update(self):
-        for obj in self.sub_objects:
+        for obj in self.get_sub_objects():
             obj.calculate_update()
 
     def update_sub_objects(self):
-        for sub_obj in self.sub_objects:
+        for sub_obj in self.get_sub_objects():
             sub_obj.calculate_update()
             sub_obj.update_sub_objects()
 
