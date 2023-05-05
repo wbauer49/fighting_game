@@ -4,15 +4,16 @@ import time
 
 import attacks
 import definitions
+import movesets
 import player
 import rendering
 import stages
 
-try:
+
+def run_match(stage):
     renderer = rendering.Renderer()
-    stage = stages.Battlefield()
-    player1 = player.Player(player_num=1, stage=stage)
-    player2 = player.Player(player_num=2, stage=stage)
+    player1 = player.Player(player_num=1, moveset=movesets.MoveSet1, stage=stage)
+    player2 = player.Player(player_num=2, moveset=movesets.MoveSet1, stage=stage)
     objects = [player2, player1]
 
     pygame.init()
@@ -47,6 +48,9 @@ try:
         else:
             print("frame lag")
 
+
+try:
+    run_match(stages.Battlefield)
 except KeyboardInterrupt:
     print("exited")
 finally:

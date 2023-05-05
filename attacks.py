@@ -49,6 +49,9 @@ class HitBox(definitions.Object):
         self.calculate_hitbox(self.frame)
 
     def get_color(self):
+        if not self.is_active:
+            return definitions.Color(0, 0, 0, a=0)
+
         alpha = min(255, 70 + 6 * self.send_power)
         angle = math.radians(self.send_angle)
         r = round(120 + 120 * -math.cos(angle))
@@ -78,7 +81,6 @@ class HitBox(definitions.Object):
 
 class Attack:
     num_frames = 20
-
     hit_player = False
 
     def __init__(self, is_facing_right):

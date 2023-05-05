@@ -2,7 +2,12 @@
 from attacks import Attack, HitBox
 
 
-class MoveSet:
+class MoveSet1:
+
+    max_vel_x = 12
+    gravity = 2
+    num_jumps = 2
+    jump_vel = 25
 
     class Jab(Attack):
         num_frames = 20
@@ -91,13 +96,13 @@ class MoveSet:
             return [hitbox1]
 
     class DownAir(Attack):
-        num_frames = 20
+        num_frames = 30
 
         def init_hitboxes(self):
-            hitbox1 = HitBox(r=20, send_angle=-90, send_power=4, damage=10)
-            hitbox1.x_func = lambda t: 10 * (t - 10)
-            hitbox1.y_func = lambda t: -70 + (t - 10) ** 2
-            return [hitbox1]
+            hitbox1 = HitBox(x=0, y=-30, r=15, send_angle=90, send_power=2, damage=5)
+            hitbox2 = HitBox(x=0, y=-60, r=30, send_angle=-90, send_power=4, damage=15)
+            hitbox2.ia_func = lambda t: 15 < t < 25
+            return [hitbox1, hitbox2]
 
     class NeutralSpecial(Attack):
         num_frames = 50

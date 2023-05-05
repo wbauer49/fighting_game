@@ -29,6 +29,9 @@ class Renderer:
             self.screen.blit(surface, (x, y))
 
     def render_object(self, obj, x_offset=0, y_offset=0):
+        if obj.get_color().a == 0:
+            return
+
         surface = pygame.Surface((2 * obj.r, 2 * obj.r))
         surface.set_colorkey((0, 0, 0))
         surface.set_alpha(obj.get_color().a)

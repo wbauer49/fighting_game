@@ -1,6 +1,5 @@
 import math
 
-import movesets
 import controllers
 import definitions
 import rendering
@@ -11,6 +10,11 @@ class Player(definitions.Object):
     is_airborne = True
     is_running = False
 
+    vel_y = 0
+    vel_x = 0
+    damage_taken = 0
+    remaining_jumps = 0
+
     airdodge_frames = 0
     attack_frames = 0
     stun_frames = 0
@@ -18,22 +22,13 @@ class Player(definitions.Object):
     paused_frames = 0
 
     curr_attack = None
-    damage_taken = 0
-
-    vel_y = 0
-    vel_x = 0
-    max_vel_x = 12
-    gravity = 2
-
     curr_platform = None
 
-    moveset = movesets.MoveSet()
-    num_jumps = 2
-    remaining_jumps = 2
-
-    def __init__(self, player_num, stage):
+    def __init__(self, player_num, moveset, stage):
         self.player_num = player_num
+        self.moveset = moveset
         self.stage = stage
+
         self.controller = controllers.GameCubeController(player_num=player_num)
         self.curr_ctrl = self.controller.get_ctrl_frame()
         self.prev_ctrl = self.controller.get_ctrl_frame()
@@ -57,6 +52,7 @@ class Player(definitions.Object):
         self.attack_frames = 0
         self.stun_frames = 0
         self.paused_frames = 10
+        self.remaining_jumps = self.moveset.num_jumps
 
     def get_hitboxes(self):
         if self.curr_attack is not None:
@@ -134,8 +130,8 @@ class Player(definitions.Object):
             self.jumpsquat_frames -= 1
 
             if self.jumpsquat_frames == 0:
-                self.remaining_jumps = self.num_jumps - 1
-                self.vel_y = 25
+                self.remaining_jumps = self.moveset.num_jumps - 1
+                self.vel_y = self.moveset.jump_vel
                 self.curr_platform = None
                 self.is_airborne = True
             return
@@ -190,7 +186,7 @@ class Player(definitions.Object):
                     (self.curr_ctrl.m_y > 50 and self.curr_ctrl.m_y - self.prev_ctrl.m_y >= 10)
             ):  # TODO: make sure this doesn't immediately double jump
                 self.remaining_jumps -= 1
-                self.vel_y = 20
+                self.vel_y = self.moveset.jump_vel
 
             if (
                     (self.curr_ctrl.l >= 80 and self.prev_ctrl.l < 80) or
@@ -236,7 +232,7 @@ class Player(definitions.Object):
                 elif self.curr_ctrl.c_y >= abs(self.curr_ctrl.c_x):
                     self.start_attack(self.moveset.UpAir)
                 elif self.curr_ctrl.c_y <= -abs(self.curr_ctrl.c_x):
-                    self.start_attack(self.moveset.UpAir)
+                    self.start_attack(self.moveset.DownAir)
                 else:
                     raise Exception("Error in c-stick aerial attack execution.")
                 return
@@ -310,19 +306,19 @@ class Player(definitions.Object):
                 accel_dir = 1 if self.curr_ctrl.m_x > 0 else -1
                 accel = (abs(self.curr_ctrl.m_x) - 10) // 30
 
-            self.vel_x = min(self.max_vel_x, max(-self.max_vel_x, self.vel_x + accel_dir * accel))
+            self.vel_x = min(self.moveset.max_vel_x, max(-self.moveset.max_vel_x, self.vel_x + accel_dir * accel))
             if not self.is_airborne:
                 if self.vel_x < 0:
                     self.is_facing_right = False
                 elif self.vel_x > 0:
                     self.is_facing_right = True
 
-                if self.vel_x == self.max_vel_x or self.vel_x == -self.max_vel_x:
+                if self.vel_x == self.moveset.max_vel_x or self.vel_x == -self.moveset.max_vel_x:
                     self.is_running = True
 
         self.y += self.vel_y
         if self.is_airborne and self.airdodge_frames == 0:
-            self.vel_y -= self.gravity
+            self.vel_y -= self.moveset.gravity
 
     def start_attack(self, attack):
         self.curr_attack = attack(self.is_facing_right)
@@ -333,7 +329,7 @@ class Player(definitions.Object):
         self.stun_frames = round(hitbox.hitstun)
         power = 1 + self.damage_taken * hitbox.send_power // 40
         self.vel_x = round(power * math.cos(math.radians(hitbox.send_angle)))
-        self.vel_y = round(power * math.sin(math.radians(hitbox.send_angle))) + self.gravity
+        self.vel_y = round(power * math.sin(math.radians(hitbox.send_angle))) + self.moveset.gravity
         self.damage_taken += hitbox.damage
         hitbox.hit_player = True
         print(self.damage_taken)
