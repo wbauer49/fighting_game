@@ -4,17 +4,14 @@ import time
 
 import attacks
 import definitions
+import env
 import movesets
-import player
+import players
 import rendering
 import stages
 
 
-def run_match(stage):
-    renderer = rendering.Renderer()
-    player1 = player.Player(player_num=1, moveset=movesets.MoveSet1, stage=stage)
-    player2 = player.Player(player_num=2, moveset=movesets.MoveSet1, stage=stage)
-    objects = [player2, player1]
+def run_match():
 
     pygame.init()
     running = True
@@ -26,21 +23,23 @@ def run_match(stage):
                 running = False
                 continue
 
-        for obj in objects:
-            obj.calculate_update()
-            obj.update_sub_objects()
+        for player in env.players:
+            player.calculate_update()
+            player.update_sub_objects()
 
-        for platform in stage.platforms:
+        for platform in env.stage.platforms:
             if platform == player1.curr_platform:
                 platform.color = definitions.Color(200, 20, 20)
             else:
                 platform.color = definitions.Color(20, 20, 20)
-        renderer.render(stage, objects)
+        env.renderer.render()
 
         pygame.display.flip()
 
-        attacks.apply_hitboxes(player1, player2)
-        attacks.apply_hitboxes(player2, player1)
+        for attacker in env.players:
+            for receiver in env.players:
+                if receiver != attacker:
+                    attacks.apply_hitboxes(attacker, receiver)
 
         sleep_time = (1 / 60) - (time.time() - start_time)
         if sleep_time > 0:
@@ -50,7 +49,15 @@ def run_match(stage):
 
 
 try:
-    run_match(stages.Battlefield)
+    env.renderer = rendering.Renderer()
+    env.stage = stages.Battlefield
+
+    player1 = players.Player(player_num=1, moveset=movesets.MoveSet1)
+    player2 = players.Player(player_num=2, moveset=movesets.MoveSet1)
+    env.players = [player1, player2]
+
+    run_match()
+
 except KeyboardInterrupt:
     print("exited")
 finally:

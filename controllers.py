@@ -28,3 +28,9 @@ class CtrlFrame:
         self.c_y = min(100, max(-100, round(-140 * joystick.get_axis(2))))
         self.l = min(100, max(0, round(100 * joystick.get_axis(3)) + 100))
         self.r = min(100, max(0, round(100 * joystick.get_axis(4)) + 100))
+
+
+class CpuController:
+
+    def get_ctrl_frame(self):
+        pass

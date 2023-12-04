@@ -1,4 +1,7 @@
+
 import pygame
+
+import env
 
 
 WIDTH = 1600
@@ -14,10 +17,10 @@ class Renderer:
         self.screen.fill(BACKGROUND_COLOR)
         pygame.display.flip()
 
-    def render(self, stage, objects):
-        self.render_stage(stage)
-        for obj in objects:
-            self.render_object(obj)
+    def render(self):
+        self.render_stage(env.stage)
+        for player in env.players:
+            self.render_object(player)
 
     def render_stage(self, stage):
         self.screen.fill(BACKGROUND_COLOR)

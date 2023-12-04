@@ -1,7 +1,9 @@
+
 import math
 
 import controllers
 import definitions
+import env
 import rendering
 
 
@@ -24,10 +26,9 @@ class Player(definitions.Object):
     curr_attack = None
     curr_platform = None
 
-    def __init__(self, player_num, moveset, stage):
+    def __init__(self, player_num, moveset):
         self.player_num = player_num
         self.moveset = moveset
-        self.stage = stage
 
         self.controller = controllers.GameCubeController(player_num=player_num)
         self.curr_ctrl = self.controller.get_ctrl_frame()
@@ -79,7 +80,7 @@ class Player(definitions.Object):
             return definitions.Color(1, 1, 1)
 
     def check_hit_ground(self):
-        for platform in self.stage.platforms:
+        for platform in env.stage.platforms:
             if platform.x - platform.w // 2 <= self.x <= platform.x + platform.w // 2:
                 # if platform.is_solid:
                 #     if platform.y - platform.h // 2 <= self.y + self.r <= platform.y + platform.h // 2:
