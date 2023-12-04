@@ -18,8 +18,8 @@ def apply_hitboxes(attacker, receiver):
         if hitbox.r + receiver.r > distance:
             receiver.apply_hitbox(hitbox)
             attacker.curr_attack.hit_player = True
-            attacker.paused_frames = 4
-            receiver.paused_frames = 4
+            attacker.paused_frames = 3
+            receiver.paused_frames = 5
             break
 
 
@@ -35,7 +35,7 @@ class HitBox(definitions.Object):
     sp_func = None
     ia_func = None
 
-    def __init__(self, x=0, y=0, r=10, send_angle=0, send_power=5, damage=10, hitstun=30):
+    def __init__(self, x=0, y=0, r=10, send_angle=0, send_power=5, damage=10, hitstun=20):
         self.x = x
         self.y = y
         self.r = r

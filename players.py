@@ -30,7 +30,10 @@ class Player(definitions.Object):
         self.player_num = player_num
         self.moveset = moveset
 
-        self.controller = controllers.GameCubeController(player_num=player_num)
+        if player_num == 0:
+            self.controller = controllers.CpuController(self)
+        else:
+            self.controller = controllers.GameCubeController(player_num=player_num)
         self.curr_ctrl = self.controller.get_ctrl_frame()
         self.prev_ctrl = self.controller.get_ctrl_frame()
 
@@ -53,7 +56,7 @@ class Player(definitions.Object):
         self.attack_frames = 0
         self.stun_frames = 0
         self.paused_frames = 10
-        self.remaining_jumps = self.moveset.num_jumps
+        self.remaining_jumps = self.moveset.num_jumps - 1
 
     def get_hitboxes(self):
         if self.curr_attack is not None:
@@ -66,16 +69,17 @@ class Player(definitions.Object):
         return self.get_hitboxes() + [self.eye]
 
     def get_color(self):
-        if self.attack_frames:
-            return definitions.Color(30, 30, 1)
-        elif self.airdodge_frames:
-            return definitions.Color(100, 1, 100)
+        if self.paused_frames:
+            return definitions.Color(100, 100, 100)
         elif self.stun_frames:
             return definitions.Color(100, 1, 1)
+        elif self.airdodge_frames:
+            return definitions.Color(100, 1, 100)
+        elif self.attack_frames:
+            return definitions.Color(30, 30, 1)
         elif self.jumpsquat_frames:
             return definitions.Color(1, 50, 50)
-        elif self.paused_frames:
-            return definitions.Color(100, 100, 100)
+
         else:
             return definitions.Color(1, 1, 1)
 

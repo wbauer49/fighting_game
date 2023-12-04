@@ -53,7 +53,7 @@ try:
     env.stage = stages.Battlefield
 
     player1 = players.Player(player_num=1, moveset=movesets.MoveSet1)
-    player2 = players.Player(player_num=2, moveset=movesets.MoveSet1)
+    player2 = players.Player(player_num=0, moveset=movesets.MoveSet1)
     env.players = [player1, player2]
 
     run_match()

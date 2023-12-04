@@ -7,13 +7,13 @@ class MoveSet1:
     max_vel_x = 12
     gravity = 2
     num_jumps = 2
-    jump_vel = 25
+    jump_vel = 28
 
     class Jab(Attack):
         num_frames = 20
 
         def init_hitboxes(self):
-            return [HitBox(x=50, y=0, r=20)]
+            return [HitBox(x=50, y=0, r=20, hitstun=10, damage=4)]
 
     class ForwardSmash(Attack):
         num_frames = 20
@@ -25,7 +25,7 @@ class MoveSet1:
         num_frames = 40
 
         def init_hitboxes(self):
-            hitbox1 = HitBox(x=10, y=70, r=40)
+            hitbox1 = HitBox(x=10, y=70, r=40, damage=20)
             hitbox1.sa_func = lambda t: t * 9
             hitbox1.sp_func = lambda t: 5 + t // 3
             return [hitbox1]
@@ -50,7 +50,7 @@ class MoveSet1:
         num_frames = 20
 
         def init_hitboxes(self):
-            hitbox1 = HitBox(y=50, r=35, send_angle=90, send_power=10)
+            hitbox1 = HitBox(y=50, r=35, send_angle=90, send_power=12)
             hitbox1.x_func = lambda t: 40 - 4 * t
             return [hitbox1]
 
@@ -72,7 +72,7 @@ class MoveSet1:
         num_frames = 20
 
         def init_hitboxes(self):
-            hitbox1 = HitBox(r=20, send_angle=90, send_power=4, damage=10)
+            hitbox1 = HitBox(r=20, send_angle=90, send_power=4, damage=9)
             hitbox1.x_func = lambda t: 70 - (t - 10) ** 2
             hitbox1.y_func = lambda t: 10 * (t - 10)
             return [hitbox1]
@@ -81,7 +81,7 @@ class MoveSet1:
         num_frames = 20
 
         def init_hitboxes(self):
-            hitbox1 = HitBox(r=20, send_angle=90, send_power=4, damage=10)
+            hitbox1 = HitBox(r=20, send_angle=90, send_power=4, damage=11)
             hitbox1.x_func = lambda t: 70 - (t - 10) ** 2
             hitbox1.y_func = lambda t: 10 * (t - 10)
             return [hitbox1]
@@ -90,7 +90,7 @@ class MoveSet1:
         num_frames = 20
 
         def init_hitboxes(self):
-            hitbox1 = HitBox(r=20, send_angle=90, send_power=4, damage=10)
+            hitbox1 = HitBox(r=20, send_angle=90, send_power=4, damage=8)
             hitbox1.x_func = lambda t: 10 * (t - 10)
             hitbox1.y_func = lambda t: 70 - (t - 10) ** 2
             return [hitbox1]
@@ -118,7 +118,7 @@ class MoveSet1:
         num_frames = 60
 
         def init_hitboxes(self):
-            hitbox1 = HitBox(x=500, r=20, send_angle=60, damage=3)
+            hitbox1 = HitBox(x=500, r=20, send_angle=60, damage=5)
             hitbox1.r_func = lambda t: t
             hitbox1.sp_func = lambda t: t // 4 + 2
             return [hitbox1]
