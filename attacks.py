@@ -82,19 +82,19 @@ class HitBox(definitions.Object):
 class Attack:
     total_frames = 20
     startup_frames = 0
-    hit_player = False
-
-    x_vel = None
-    y_vel = None
-
-    xv_func = None
-    yv_func = None
+    vel_x = None
+    vel_y = None
+    vx_func = None
+    vy_func = None
 
     frame = 0
     hitboxes = []
+    hit_player = False
 
     def __init__(self, is_facing_right):
         self.is_facing_right = is_facing_right
+        if self.vel_x is not None and not self.is_facing_right:
+            self.vel_x *= -1
 
     def init_hitboxes(self):
         return []
@@ -117,7 +117,7 @@ class Attack:
         self.calculate_attack(self.frame)
 
     def calculate_attack(self, t):
-        if self.xv_func:
-            self.x_vel = self.xv_func(t)
-        if self.yv_func:
-            self.y_vel = self.yv_func(t)
+        if self.vx_func:
+            self.vel_x = self.vx_func(t)
+        if self.vy_func:
+            self.vel_y = self.vy_func(t)

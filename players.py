@@ -141,9 +141,6 @@ class Player(definitions.Object):
                 self.is_airborne = True
             return
 
-        if self.curr_attack is not None:
-            self.curr_attack.step()
-
         if self.curr_platform and (
                 self.x < self.curr_platform.x - self.curr_platform.w // 2 or
                 self.x > self.curr_platform.x + self.curr_platform.w // 2
@@ -152,7 +149,6 @@ class Player(definitions.Object):
             self.is_airborne = True
 
         self.apply_movement()
-
         hit_ground = self.check_hit_ground()
 
         if self.stun_frames > 0:
@@ -160,6 +156,7 @@ class Player(definitions.Object):
             return
 
         if self.attack_frames > 0:
+            self.curr_attack.step()
             if hit_ground or self.attack_frames == 1:
                 self.curr_attack = None
                 self.attack_frames = 0
@@ -285,20 +282,21 @@ class Player(definitions.Object):
             return
 
     def apply_movement(self):
-        if self.curr_attack and self.curr_attack.vel_x is not None:
+
+        if self.curr_attack and not (self.curr_attack.vel_x is None):
             self.vel_x = self.curr_attack.vel_x
             self.vel_y = self.curr_attack.vel_y
 
         self.x += self.vel_x
 
         if self.x > rendering.WIDTH // 2 - self.r:
-            self.vel_x = -abs(self.vel_x)
+            self.vel_x = 0
             self.x = rendering.WIDTH // 2 - self.r
         elif self.x < -(rendering.WIDTH // 2 - self.r):
-            self.vel_x = abs(self.vel_x)
+            self.vel_x = 0
             self.x = -(rendering.WIDTH // 2 - self.r)
 
-        elif self.attack_frames > 0 or abs(self.curr_ctrl.m_x) < 20:
+        elif not self.is_airborne and (self.attack_frames > 0 or abs(self.curr_ctrl.m_x) < 20):
             if self.vel_x > 0:
                 self.vel_x -= 1
             elif self.vel_x < 0:
@@ -335,10 +333,9 @@ class Player(definitions.Object):
 
     def apply_hitbox(self, hitbox):
         self.is_airborne = True
-        self.stun_frames = round(hitbox.hitstun)
+        self.stun_frames = round(hitbox.hitstun * (self.damage_taken / 50 + 1) * (hitbox.damage / 10))
         power = 1 + self.damage_taken * hitbox.send_power // 40
         self.vel_x = round(power * math.cos(math.radians(hitbox.send_angle)))
         self.vel_y = round(power * math.sin(math.radians(hitbox.send_angle))) + self.moveset.gravity * 2
         self.damage_taken += hitbox.damage
         hitbox.hit_player = True
-        print(self.damage_taken)

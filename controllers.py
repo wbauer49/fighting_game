@@ -13,17 +13,19 @@ class CtrlFrame:
         self.z = z
         self.start = start
 
-        m_x = min(100, max(-100, round(m_x)))
-        m_y = min(100, max(-100, round(m_y)))
-        m_r = max(1, (m_x ** 2 + m_y ** 2) ** 0.5)
-        self.m_x = round(m_x / m_r)
-        self.m_y = round(m_y / m_r)
+        self.m_x = min(100, max(-100, m_x))
+        self.m_y = min(100, max(-100, m_y))
+        m_r = (m_x ** 2 + m_y ** 2) ** 0.5
+        if m_r > 100:
+            self.m_x = round(self.m_x * 100 / m_r)
+            self.m_y = round(self.m_y * 100 / m_r)
 
-        c_x = min(100, max(-100, round(c_x)))
-        c_y = min(100, max(-100, round(c_y)))
+        self.c_x = min(100, max(-100, c_x))
+        self.c_y = min(100, max(-100, c_y))
         c_r = max(1, (c_x ** 2 + c_y ** 2) ** 0.5)
-        self. c_x = round(c_x / c_r)
-        self. c_y = round(c_y / c_r)
+        if c_r > 100:
+            self.c_x = round(self.c_x * 100 / c_r)
+            self.c_y = round(self.c_y * 100 / c_r)
 
         self.l = min(100, max(0, round(l)))
         self.r = min(100, max(0, round(r)))
@@ -64,9 +66,9 @@ class CpuController:
         m_x = 0
         m_y = 0
 
-        if self.body.x < -100:
+        if self.body.x < -300:
             m_x = 60
-        elif self.body.x > 100:
+        elif self.body.x > 300:
             m_x = -60
 
         if self.body.y < -250:

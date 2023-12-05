@@ -21,7 +21,7 @@ class MoveSet1:
         startup_frames = 10
 
         def init_hitboxes(self):
-            return [HitBox(x=70, y=10, r=50, send_angle=20, send_power=20)]
+            return [HitBox(x=70, y=10, r=50, send_angle=20, send_power=20, damage=23)]
 
     class UpSmash(Attack):
         total_frames = 40
@@ -83,9 +83,10 @@ class MoveSet1:
         total_frames = 20
 
         def init_hitboxes(self):
-            hitbox1 = HitBox(r=20, send_angle=90, send_power=4, damage=11)
-            hitbox1.x_func = lambda t: 70 - (t - 10) ** 2
-            hitbox1.y_func = lambda t: 10 * (t - 10)
+            hitbox1 = HitBox(r=30, send_angle=150, damage=11)
+            hitbox1.x_func = lambda t: -2 * t - 50
+            hitbox1.y_func = lambda t: t
+            hitbox1.sp_func = lambda t: t // 3 + 4
             return [hitbox1]
 
     class UpAir(Attack):
@@ -126,9 +127,9 @@ class MoveSet1:
             return [hitbox1]
 
     class UpSpecial(Attack):
-        total_frames = 20
-        vel_x = 0
-        vel_y = 8
+        total_frames = 30
+        vel_x = 2
+        vel_y = 14
 
         def init_hitboxes(self):
             return [HitBox(x=15, y=80, r=70, send_angle=90, send_power=8)]
