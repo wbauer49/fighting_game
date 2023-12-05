@@ -12,10 +12,19 @@ class CtrlFrame:
         self.y = y
         self.z = z
         self.start = start
-        self.m_x = min(100, max(-100, round(m_x)))
-        self.m_y = min(100, max(-100, round(m_y)))
-        self.c_x = min(100, max(-100, round(c_x)))
-        self.c_y = min(100, max(-100, round(c_y)))
+
+        m_x = min(100, max(-100, round(m_x)))
+        m_y = min(100, max(-100, round(m_y)))
+        m_r = max(1, (m_x ** 2 + m_y ** 2) ** 0.5)
+        self.m_x = round(m_x / m_r)
+        self.m_y = round(m_y / m_r)
+
+        c_x = min(100, max(-100, round(c_x)))
+        c_y = min(100, max(-100, round(c_y)))
+        c_r = max(1, (c_x ** 2 + c_y ** 2) ** 0.5)
+        self. c_x = round(c_x / c_r)
+        self. c_y = round(c_y / c_r)
+
         self.l = min(100, max(0, round(l)))
         self.r = min(100, max(0, round(r)))
 

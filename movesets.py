@@ -8,21 +8,23 @@ class MoveSet1:
     gravity = 2
     num_jumps = 2
     jump_vel = 28
+    jumpsquat = 4
 
     class Jab(Attack):
-        num_frames = 20
+        total_frames = 20
 
         def init_hitboxes(self):
             return [HitBox(x=50, y=0, r=20, hitstun=10, damage=4)]
 
     class ForwardSmash(Attack):
-        num_frames = 20
+        total_frames = 30
+        startup_frames = 10
 
         def init_hitboxes(self):
             return [HitBox(x=70, y=10, r=50, send_angle=20, send_power=20)]
 
     class UpSmash(Attack):
-        num_frames = 40
+        total_frames = 40
 
         def init_hitboxes(self):
             hitbox1 = HitBox(x=10, y=70, r=40, damage=20)
@@ -31,7 +33,7 @@ class MoveSet1:
             return [hitbox1]
 
     class DownSmash(Attack):
-        num_frames = 30
+        total_frames = 30
 
         def init_hitboxes(self):
             hitbox1 = HitBox(y=-25, r=20, send_angle=190, send_power=12, damage=15)
@@ -41,13 +43,13 @@ class MoveSet1:
             return [hitbox1, hitbox2]
 
     class ForwardTilt(Attack):
-        num_frames = 20
+        total_frames = 20
 
         def init_hitboxes(self):
             return [HitBox(x=40, y=0, r=10, send_angle=10, send_power=8)]
 
     class UpTilt(Attack):
-        num_frames = 20
+        total_frames = 20
 
         def init_hitboxes(self):
             hitbox1 = HitBox(y=50, r=35, send_angle=90, send_power=12)
@@ -55,21 +57,21 @@ class MoveSet1:
             return [hitbox1]
 
     class DownTilt(Attack):
-        num_frames = 20
+        total_frames = 20
 
         def init_hitboxes(self):
             return [HitBox(x=30, y=-20, r=20, send_angle=40, send_power=8),
                     HitBox(x=60, y=-25, r=15, send_angle=90, send_power=6)]
 
     class NeutralAir(Attack):
-        num_frames = 10
+        total_frames = 10
 
         def init_hitboxes(self):
             return [HitBox(x=30, y=0, r=30, send_angle=30, send_power=8),
                     HitBox(x=-30, y=0, r=25, send_angle=150, send_power=8)]
 
     class ForwardAir(Attack):
-        num_frames = 20
+        total_frames = 20
 
         def init_hitboxes(self):
             hitbox1 = HitBox(r=20, send_angle=90, send_power=4, damage=9)
@@ -78,7 +80,7 @@ class MoveSet1:
             return [hitbox1]
 
     class BackAir(Attack):
-        num_frames = 20
+        total_frames = 20
 
         def init_hitboxes(self):
             hitbox1 = HitBox(r=20, send_angle=90, send_power=4, damage=11)
@@ -87,7 +89,7 @@ class MoveSet1:
             return [hitbox1]
 
     class UpAir(Attack):
-        num_frames = 20
+        total_frames = 20
 
         def init_hitboxes(self):
             hitbox1 = HitBox(r=20, send_angle=90, send_power=4, damage=8)
@@ -96,7 +98,7 @@ class MoveSet1:
             return [hitbox1]
 
     class DownAir(Attack):
-        num_frames = 30
+        total_frames = 30
 
         def init_hitboxes(self):
             hitbox1 = HitBox(x=0, y=-30, r=15, send_angle=90, send_power=2, damage=5)
@@ -105,7 +107,7 @@ class MoveSet1:
             return [hitbox1, hitbox2]
 
     class NeutralSpecial(Attack):
-        num_frames = 50
+        total_frames = 50
 
         def init_hitboxes(self):
             hitbox1 = HitBox(y=0, r=20, send_angle=60, send_power=4, damage=10)
@@ -115,7 +117,7 @@ class MoveSet1:
             return [hitbox1, hitbox2]
 
     class ForwardSpecial(Attack):
-        num_frames = 60
+        total_frames = 60
 
         def init_hitboxes(self):
             hitbox1 = HitBox(x=500, r=20, send_angle=60, damage=5)
@@ -124,7 +126,17 @@ class MoveSet1:
             return [hitbox1]
 
     class UpSpecial(Attack):
-        num_frames = 20
+        total_frames = 20
+        vel_x = 0
+        vel_y = 8
+
+        def init_hitboxes(self):
+            return [HitBox(x=15, y=80, r=70, send_angle=90, send_power=8)]
 
     class DownSpecial(Attack):
-        num_frames = 20
+        total_frames = 30
+        y_vel = -10
+
+        def init_hitboxes(self):
+            return [HitBox(x=30, y=-80, r=40, send_angle=270, send_power=15),
+                    HitBox(x=-30, y=-70, r=35, send_angle=320, send_power=20)]

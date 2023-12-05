@@ -80,19 +80,44 @@ class HitBox(definitions.Object):
 
 
 class Attack:
-    num_frames = 20
+    total_frames = 20
+    startup_frames = 0
     hit_player = False
+
+    x_vel = None
+    y_vel = None
+
+    xv_func = None
+    yv_func = None
+
+    frame = 0
+    hitboxes = []
 
     def __init__(self, is_facing_right):
         self.is_facing_right = is_facing_right
 
+    def init_hitboxes(self):
+        return []
+
+    def spawn_hitboxes(self):
         self.hitboxes = self.init_hitboxes()
         for hitbox in self.hitboxes:
-            # TODO: move this to hitbox initializer
             hitbox.calculate_hitbox(0)
             if not self.is_facing_right:
                 hitbox.is_facing_right = False
                 hitbox.send_angle = (180 - hitbox.send_angle) % 360
 
-    def init_hitboxes(self):
-        return []
+    def step(self):
+        for hitbox in self.hitboxes:
+            hitbox.step()
+        if self.frame == self.startup_frames:
+            self.spawn_hitboxes()
+
+        self.frame += 1
+        self.calculate_attack(self.frame)
+
+    def calculate_attack(self, t):
+        if self.xv_func:
+            self.x_vel = self.xv_func(t)
+        if self.yv_func:
+            self.y_vel = self.yv_func(t)
