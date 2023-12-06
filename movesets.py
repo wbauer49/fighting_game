@@ -136,7 +136,7 @@ class MoveSet1:
 
     class DownSpecial(Attack):
         total_frames = 30
-        y_vel = -10
+        vel_y = -10
 
         def init_hitboxes(self):
             return [HitBox(x=30, y=-80, r=40, send_angle=270, send_power=15),

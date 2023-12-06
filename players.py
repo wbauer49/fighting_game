@@ -186,7 +186,7 @@ class Player(definitions.Object):
                     (self.curr_ctrl.x and not self.prev_ctrl.x) or
                     (self.curr_ctrl.y and not self.prev_ctrl.y) or
                     (self.curr_ctrl.m_y > 50 and self.curr_ctrl.m_y - self.prev_ctrl.m_y >= 10)
-            ):  # TODO: make sure this doesn't immediately double jump
+            ):  # TODO: make sure this doesn't immediately double jump (for 3-jump chars)
                 self.remaining_jumps -= 1
                 self.vel_y = self.moveset.jump_vel
 
@@ -283,9 +283,11 @@ class Player(definitions.Object):
 
     def apply_movement(self):
 
-        if self.curr_attack and not (self.curr_attack.vel_x is None):
-            self.vel_x = self.curr_attack.vel_x
-            self.vel_y = self.curr_attack.vel_y
+        if self.curr_attack:
+            if self.curr_attack.vel_x is not None:
+                self.vel_x = self.curr_attack.vel_x
+            if self.curr_attack.vel_y is not None:
+                self.vel_y = self.curr_attack.vel_y
 
         self.x += self.vel_x
 
