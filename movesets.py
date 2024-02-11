@@ -7,8 +7,9 @@ class MoveSet1:
     max_vel_x = 12
     gravity = 2
     num_jumps = 2
-    jump_vel = 28
-    jumpsquat = 4
+    jumpsquat = 5
+    jump_vels = [24, 24, 24, 28, 28, 32]
+    double_jump_vel = 26
 
     class Jab(Attack):
         total_frames = 20
