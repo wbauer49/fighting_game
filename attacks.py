@@ -2,6 +2,8 @@
 import math
 
 import definitions
+import env
+import particles
 
 
 def apply_hitboxes(attacker, receiver):
@@ -20,6 +22,8 @@ def apply_hitboxes(attacker, receiver):
             attacker.curr_attack.hit_player = True
             attacker.paused_frames = 3
             receiver.paused_frames = 5
+
+            env.particles.append(particles.Hitmarker(attacker, hitbox))
             break
 
 

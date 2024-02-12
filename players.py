@@ -89,15 +89,7 @@ class Player(definitions.Object):
     def check_hit_ground(self):
         for platform in env.stage.platforms:
             if platform.x - platform.w // 2 <= self.x <= platform.x + platform.w // 2:
-                # if platform.is_solid:
-                #     if platform.y - platform.h // 2 <= self.y + self.r <= platform.y + platform.h // 2:
-                #         self.vel_y = 0
-                #     self.y = platform.y - platform.h // 2 - self.r
-                if (
-                        self.y - self.r < platform.y + platform.h // 2 and
-                        self.y > platform.y - platform.h // 2 and
-                        self.y - self.r - self.vel_y >= platform.y + platform.h // 2
-                ):
+                if self.y - self.r < platform.y + platform.h // 2 <= self.y - self.r - self.vel_y:
                     self.y = platform.y + platform.h // 2 + self.r
                     self.vel_y = 0
                     self.is_airborne = False
@@ -120,6 +112,7 @@ class Player(definitions.Object):
             self.respawn()
             return
 
+        # Air-dodge
         if self.airdodge_frames > 0:
             self.airdodge_frames -= 1
             self.x += self.vel_x
@@ -134,6 +127,7 @@ class Player(definitions.Object):
                 self.paused_frames = 6
             return
 
+        # Grounded jump
         if self.jumpsquat_frames > 0:
             self.jumpsquat_frames -= 1
 
@@ -148,6 +142,10 @@ class Player(definitions.Object):
                 self.is_airborne = True
             return
 
+        self.apply_movement()
+        hit_ground = self.check_hit_ground()
+
+        # Run off platform
         if self.curr_platform and (
                 self.x < self.curr_platform.x - self.curr_platform.w // 2 or
                 self.x > self.curr_platform.x + self.curr_platform.w // 2
@@ -155,19 +153,19 @@ class Player(definitions.Object):
             self.curr_platform = None
             self.is_airborne = True
 
-        if self.curr_platform:
+        # Drop through platform
+        if self.curr_platform and not self.curr_platform.is_solid:
             if self.curr_ctrl.m_y < -50:
-                self.y -= 1
+                self.y -= 3
+                self.vel_y = 0
                 self.curr_platform = None
                 self.is_airborne = True
-
-        self.apply_movement()
-        hit_ground = self.check_hit_ground()
 
         if self.stun_frames > 0:
             self.stun_frames -= 1
             return
 
+        # General attack
         if self.attack_frames > 0:
             self.curr_attack.step()
             if hit_ground or self.attack_frames == 1:
@@ -362,7 +360,6 @@ class Player(definitions.Object):
         self.attack_frames = self.curr_attack.total_frames
 
     def apply_hitbox(self, hitbox):
-        hitbox.hit_player = True
         self.is_airborne = True
         self.damage_taken += hitbox.damage
         self.stun_frames = round(hitbox.hitstun * (self.damage_taken / 50 + 1) * (hitbox.damage / 10))
@@ -370,5 +367,3 @@ class Player(definitions.Object):
         power = 1 + self.damage_taken * hitbox.send_power // 40
         self.vel_x = round(power * math.cos(math.radians(hitbox.send_angle)) + self.curr_ctrl.m_x / 15)
         self.vel_y = round(power * math.sin(math.radians(hitbox.send_angle)) + self.curr_ctrl.m_y / 15) + self.moveset.gravity * 2
-
-        env.particles.append(particles.Hitmarker(hitbox))

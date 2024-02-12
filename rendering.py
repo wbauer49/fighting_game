@@ -22,6 +22,8 @@ class Renderer:
     def render(self):
         self.render_stage()
         self.render_damages()
+        for particle in env.particles:
+            self.render_object(particle)
         for player in env.players:
             self.render_object(player)
 
