@@ -1,4 +1,5 @@
 
 renderer = None
 stage = None
-players = None
+players = []
+particles = []

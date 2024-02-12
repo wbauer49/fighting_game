@@ -4,6 +4,7 @@ import math
 import controllers
 import definitions
 import env
+import particles
 import rendering
 
 
@@ -361,11 +362,13 @@ class Player(definitions.Object):
         self.attack_frames = self.curr_attack.total_frames
 
     def apply_hitbox(self, hitbox):
-        self.is_airborne = True
-        # TODO: Add player DI here
-        self.stun_frames = round(hitbox.hitstun * (self.damage_taken / 50 + 1) * (hitbox.damage / 10))
-        power = 1 + self.damage_taken * hitbox.send_power // 40
-        self.vel_x = round(power * math.cos(math.radians(hitbox.send_angle)))
-        self.vel_y = round(power * math.sin(math.radians(hitbox.send_angle))) + self.moveset.gravity * 2
-        self.damage_taken += hitbox.damage
         hitbox.hit_player = True
+        self.is_airborne = True
+        self.damage_taken += hitbox.damage
+        self.stun_frames = round(hitbox.hitstun * (self.damage_taken / 50 + 1) * (hitbox.damage / 10))
+
+        power = 1 + self.damage_taken * hitbox.send_power // 40
+        self.vel_x = round(power * math.cos(math.radians(hitbox.send_angle)) + self.curr_ctrl.m_x / 15)
+        self.vel_y = round(power * math.sin(math.radians(hitbox.send_angle)) + self.curr_ctrl.m_y / 15) + self.moveset.gravity * 2
+
+        env.particles.append(particles.Hitmarker(hitbox))

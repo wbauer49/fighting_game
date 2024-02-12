@@ -32,8 +32,12 @@ def run_match():
                 platform.color = definitions.Color(200, 20, 20)
             else:
                 platform.color = definitions.Color(20, 20, 20)
-        env.renderer.render()
 
+        env.particles = [p for p in env.particles if not p.finished]
+        for particle in env.particles:
+            particle.step()
+
+        env.renderer.render()
         pygame.display.flip()
 
         for attacker in env.players:
