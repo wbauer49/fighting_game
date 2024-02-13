@@ -22,8 +22,8 @@ class Stage(definitions.Object):
 class Battlefield(Stage):
 
     platforms = [
-        Platform(0, -250, 900, 40, is_solid=True),
-        Platform(300, -50, 200, 20),
-        Platform(-300, -50, 200, 20),
-        Platform(0, 150, 200, 20),
+        Platform(0, -200, 1000, 40, is_solid=True),
+        Platform(300, 0, 250, 20),
+        Platform(-300, 0, 250, 20),
+        Platform(0, 200, 250, 20),
     ]

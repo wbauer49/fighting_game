@@ -145,6 +145,13 @@ class Player(definitions.Object):
         self.apply_movement()
         hit_ground = self.check_hit_ground()
 
+        # Hit-stun
+        if self.stun_frames > 0:
+            self.stun_frames -= 1
+            if hit_ground:
+                self.stun_frames = 0
+            return
+
         # Run off platform
         if self.curr_platform and (
                 self.x < self.curr_platform.x - self.curr_platform.w // 2 or
@@ -161,9 +168,9 @@ class Player(definitions.Object):
                 self.curr_platform = None
                 self.is_airborne = True
 
-        if self.stun_frames > 0:
-            self.stun_frames -= 1
-            return
+        # Z-button momentum reversal
+        if self.curr_ctrl.z and not self.prev_ctrl.z:
+            self.vel_x *= -1
 
         # General attack
         if self.attack_frames > 0:
@@ -303,10 +310,6 @@ class Player(definitions.Object):
                 raise Exception("Error in smash attack execution.")
             return
 
-        # Z-button momentum reversal
-        if self.curr_ctrl.z and not self.prev_ctrl.z:
-            self.vel_x *= -1
-
     def apply_movement(self):
 
         if self.curr_attack:
@@ -317,11 +320,13 @@ class Player(definitions.Object):
 
         self.x += self.vel_x
 
+        gravity = self.moveset.gravity
+
         if self.x > rendering.WIDTH // 2 - self.r:
-            self.vel_x = 0
+            self.vel_x //= -2
             self.x = rendering.WIDTH // 2 - self.r
         elif self.x < -(rendering.WIDTH // 2 - self.r):
-            self.vel_x = 0
+            self.vel_x //= -2
             self.x = -(rendering.WIDTH // 2 - self.r)
 
         elif not self.is_airborne and (self.attack_frames > 0 or abs(self.curr_ctrl.m_x) < 20):
@@ -329,6 +334,9 @@ class Player(definitions.Object):
                 self.vel_x -= 1
             elif self.vel_x < 0:
                 self.vel_x += 1
+
+        elif self.stun_frames > 0:
+            gravity = 2 * gravity // 3
 
         else:
             if abs(self.curr_ctrl.m_x) < 10:
@@ -349,11 +357,8 @@ class Player(definitions.Object):
                     self.is_running = True
 
         self.y += self.vel_y
-        if self.is_airborne and self.airdodge_frames == 0:
-            if self.stun_frames > 0:
-                self.vel_y -= self.moveset.gravity // 2
-            else:
-                self.vel_y -= self.moveset.gravity
+        if self.is_airborne:
+            self.vel_y -= gravity
 
     def start_attack(self, attack):
         self.curr_attack = attack(self.is_facing_right)
@@ -362,7 +367,7 @@ class Player(definitions.Object):
     def apply_hitbox(self, hitbox):
         self.is_airborne = True
         self.damage_taken += hitbox.damage
-        self.stun_frames = round(hitbox.hitstun * (self.damage_taken / 50 + 1) * (hitbox.damage / 10))
+        self.stun_frames = round(0.3 * hitbox.hitstun * (self.damage_taken / 50 + 1) * (hitbox.damage / 30 + 1))
 
         power = 1 + self.damage_taken * hitbox.send_power // 40
         self.vel_x = round(power * math.cos(math.radians(hitbox.send_angle)) + self.curr_ctrl.m_x / 15)
